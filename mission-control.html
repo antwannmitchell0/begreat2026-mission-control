@@ -649,6 +649,47 @@
   }
 
   /* ═══════════════════════════════════════════════
+     WIN CATEGORY
+  ═══════════════════════════════════════════════ */
+  .win-cat-stat {
+    text-align:center; padding:12px 6px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:10px; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .win-cat-stat:hover { border-color:var(--gold-line); background:var(--gold-dim); transform:translateY(-2px); }
+  .wcs-icon { font-size:20px; margin-bottom:4px; }
+  .wcs-num { font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900; color:var(--gold); }
+  .wcs-lbl { font-size:9px; color:var(--gray); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+
+  .win-item {
+    display:flex; align-items:flex-start; gap:14px;
+    padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+    animation:slide-in 0.4s ease;
+  }
+  .win-item:last-child { border-bottom:none; }
+  .win-trophy {
+    width:38px; height:38px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    background:rgba(212,175,55,0.1); border:1px solid var(--gold-line);
+  }
+  .win-body { flex:1; }
+  .win-text { font-size:13px; font-weight:500; color:var(--white); line-height:1.4; }
+  .win-meta { display:flex; align-items:center; gap:10px; margin-top:4px; }
+  .win-tag { font-size:10px; padding:2px 8px; border-radius:6px; font-weight:700; letter-spacing:1px; }
+  .win-date { font-size:10px; color:var(--gray-dim); }
+  .win-day { font-family:'Orbitron',sans-serif; font-size:10px; color:var(--gold); font-weight:700; }
+
+  .wt-content  { background:rgba(131,58,180,0.15); color:#c084fc; }
+  .wt-growth   { background:rgba(0,230,118,0.12);  color:var(--green); }
+  .wt-revenue  { background:rgba(212,175,55,0.12); color:var(--gold); }
+  .wt-tech     { background:rgba(64,196,255,0.12); color:var(--blue); }
+  .wt-speaking { background:rgba(255,171,64,0.12); color:#FFAB40; }
+  .wt-mindset  { background:rgba(206,147,216,0.12);color:var(--purple); }
+  .wt-system   { background:rgba(229,57,53,0.1);   color:#EF9A9A; }
+
+  /* ═══════════════════════════════════════════════
      BOT CARDS
   ═══════════════════════════════════════════════ */
   .bot-card { cursor:default; }
@@ -1228,6 +1269,83 @@
     <div id="bot-output-body" style="font-size:13px;line-height:1.8;color:var(--gray)"></div>
   </div>
 
+  <!-- WIN CATEGORY -->
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">🏆 Win Category</div>
+    <div class="section-line"></div>
+    <div class="card-badge badge-gold" style="margin-left:12px;white-space:nowrap">DAY 1 — <span id="win-count">11</span> WINS</div>
+  </div>
+
+  <div class="card card-gold" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title">🏆 Every Win Counts — The Record Never Lies</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="gen-btn" style="padding:8px 16px;font-size:11px" onclick="addWin()">+ Log a Win</button>
+      </div>
+    </div>
+
+    <!-- Win Input -->
+    <div id="win-input-wrap" style="display:none;margin-bottom:20px;background:rgba(0,0,0,0.3);border:1px solid var(--gold-line);border-radius:12px;padding:16px">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase">📝 Log Your Win</div>
+      <input id="win-text" type="text" placeholder="What did you accomplish today?" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;color:var(--white);font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:10px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select id="win-cat" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;color:var(--white);font-size:12px;font-family:'Inter',sans-serif;outline:none;cursor:pointer">
+          <option value="content">🎨 Content</option>
+          <option value="growth">📈 Growth</option>
+          <option value="revenue">💰 Revenue</option>
+          <option value="tech">⚙️ Tech Built</option>
+          <option value="speaking">🎤 Speaking</option>
+          <option value="mindset">🧠 Mindset</option>
+          <option value="system">🤖 System</option>
+        </select>
+        <button class="gen-btn" style="padding:10px 20px;font-size:11px" onclick="saveWin()">Save Win ⚡</button>
+        <button class="gen-btn gen-btn-outline" style="padding:10px 20px;font-size:11px" onclick="document.getElementById('win-input-wrap').style.display='none'">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Win Stats Bar -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px" id="win-stat-bar">
+      <div class="win-cat-stat" data-cat="content">
+        <div class="wcs-icon">🎨</div>
+        <div class="wcs-num" id="wc-content">3</div>
+        <div class="wcs-lbl">Content</div>
+      </div>
+      <div class="win-cat-stat" data-cat="growth">
+        <div class="wcs-icon">📈</div>
+        <div class="wcs-num" id="wc-growth">1</div>
+        <div class="wcs-lbl">Growth</div>
+      </div>
+      <div class="win-cat-stat" data-cat="revenue">
+        <div class="wcs-icon">💰</div>
+        <div class="wcs-num" id="wc-revenue">0</div>
+        <div class="wcs-lbl">Revenue</div>
+      </div>
+      <div class="win-cat-stat" data-cat="tech">
+        <div class="wcs-icon">⚙️</div>
+        <div class="wcs-num" id="wc-tech">4</div>
+        <div class="wcs-lbl">Tech Built</div>
+      </div>
+      <div class="win-cat-stat" data-cat="speaking">
+        <div class="wcs-icon">🎤</div>
+        <div class="wcs-num" id="wc-speaking">0</div>
+        <div class="wcs-lbl">Speaking</div>
+      </div>
+      <div class="win-cat-stat" data-cat="mindset">
+        <div class="wcs-icon">🧠</div>
+        <div class="wcs-num" id="wc-mindset">1</div>
+        <div class="wcs-lbl">Mindset</div>
+      </div>
+      <div class="win-cat-stat" data-cat="system">
+        <div class="wcs-icon">🤖</div>
+        <div class="wcs-num" id="wc-system">2</div>
+        <div class="wcs-lbl">System</div>
+      </div>
+    </div>
+
+    <!-- Win Feed -->
+    <div id="win-feed"></div>
+  </div>
+
   <!-- BOTTOM QUICK ACTIONS -->
   <div class="card" style="margin-top:4px">
     <div class="card-header">
@@ -1386,6 +1504,96 @@ function launchTool(tool) {
   el.style.display = 'block';
   el.innerHTML = toolMessages[tool].replace(/\n/g,'<br>');
 }
+
+// ═══════════════════════════════════════
+// WIN CATEGORY
+// ═══════════════════════════════════════
+const catIcons = { content:'🎨', growth:'📈', revenue:'💰', tech:'⚙️', speaking:'🎤', mindset:'🧠', system:'🤖' };
+const catLabels = { content:'Content', growth:'Growth', revenue:'Revenue', tech:'Tech Built', speaking:'Speaking', mindset:'Mindset', system:'System' };
+
+const defaultWins = [
+  { text:'Launched BeGreat2026 Mission Control — fully deployed to Vercel', cat:'tech', date:'Apr 2, 2026', day:1 },
+  { text:'Pushed Mission Control to GitHub: antwannmitchell0/begreat2026-mission-control', cat:'tech', date:'Apr 2, 2026', day:1 },
+  { text:'Built the Flyer Factory — generates 30 branded flyers in 60 seconds', cat:'system', date:'Apr 2, 2026', day:1 },
+  { text:'Built the Daily Content Engine — 500+ ideas, full captions, 9 posts/day plan', cat:'system', date:'Apr 2, 2026', day:1 },
+  { text:'Generated 10 branded BeGreat2026 flyers — saved to Desktop + iCloud', cat:'content', date:'Apr 2, 2026', day:1 },
+  { text:'Cut 5 viral clips from "In The Car" video using AI audio analysis', cat:'content', date:'Apr 2, 2026', day:1 },
+  { text:'Delivered all 5 clips to iCloud: BeGreat_clip_1 through BeGreat_clip_5', cat:'content', date:'Apr 2, 2026', day:1 },
+  { text:'Wrote all 5 bot scripts: DM, Lead Capture, Follow-Up, Review, Booking Confirmation', cat:'tech', date:'Apr 2, 2026', day:1 },
+  { text:'Built 90-Day brand strategy: 0 to 150K followers plan fully mapped', cat:'growth', date:'Apr 2, 2026', day:1 },
+  { text:'Organized everything into Be Great 2026 iCloud folder — one place, all devices', cat:'system', date:'Apr 2, 2026', day:1 },
+  { text:'Decided to go all in on BeGreat2026 — brand launch officially activated', cat:'mindset', date:'Apr 2, 2026', day:1 },
+];
+
+function loadWins() {
+  const stored = localStorage.getItem('begreat_wins');
+  return stored ? JSON.parse(stored) : defaultWins;
+}
+
+function saveWins(wins) {
+  localStorage.setItem('begreat_wins', JSON.stringify(wins));
+}
+
+function renderWins() {
+  const wins = loadWins();
+  const feed = document.getElementById('win-feed');
+  feed.innerHTML = '';
+
+  // Update counts
+  const cats = { content:0, growth:0, revenue:0, tech:0, speaking:0, mindset:0, system:0 };
+  wins.forEach(w => { if(cats[w.cat]!==undefined) cats[w.cat]++; });
+  Object.keys(cats).forEach(c => {
+    const el = document.getElementById('wc-'+c);
+    if(el) el.textContent = cats[c];
+  });
+  document.getElementById('win-count').textContent = wins.length;
+
+  // Render newest first
+  [...wins].reverse().forEach(w => {
+    feed.innerHTML += `
+    <div class="win-item">
+      <div class="win-trophy">${catIcons[w.cat]||'🏆'}</div>
+      <div class="win-body">
+        <div class="win-text">${w.text}</div>
+        <div class="win-meta">
+          <span class="win-tag wt-${w.cat}">${catLabels[w.cat]||w.cat}</span>
+          <span class="win-day">DAY ${w.day||1}</span>
+          <span class="win-date">${w.date}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+function addWin() {
+  const wrap = document.getElementById('win-input-wrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  if(wrap.style.display==='block') document.getElementById('win-text').focus();
+}
+
+function saveWin() {
+  const text = document.getElementById('win-text').value.trim();
+  if(!text) return;
+  const cat = document.getElementById('win-cat').value;
+  const now = new Date();
+  const launch = new Date('2026-04-02');
+  const day = Math.floor((now - launch) / 86400000) + 1;
+  const date = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const wins = loadWins();
+  wins.push({ text, cat, date, day });
+  saveWins(wins);
+  document.getElementById('win-text').value = '';
+  document.getElementById('win-input-wrap').style.display = 'none';
+  renderWins();
+}
+
+// Allow Enter key to save
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('win-text')?.addEventListener('keydown', e => {
+    if(e.key==='Enter') saveWin();
+  });
+  renderWins();
+});
 
 // ═══════════════════════════════════════
 // BOT ACTIONS
