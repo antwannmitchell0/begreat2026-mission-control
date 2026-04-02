@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B.E.G.R.E.A.T. 2026 — MISSION CONTROL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════
+     FOUNDATION
+  ═══════════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:      #060608;
+    --deep:       #0d0d12;
+    --surface:    #111118;
+    --card:       rgba(255,255,255,0.03);
+    --gold:       #D4AF37;
+    --gold-glow:  #F0C93A;
+    --gold-dim:   rgba(212,175,55,0.15);
+    --gold-line:  rgba(212,175,55,0.3);
+    --white:      #FFFFFF;
+    --gray:       rgba(255,255,255,0.5);
+    --gray-dim:   rgba(255,255,255,0.15);
+    --red:        #E53935;
+    --green:      #00E676;
+    --blue:       #40C4FF;
+    --purple:     #CE93D8;
+    --radius:     16px;
+    --glow: 0 0 30px rgba(212,175,55,0.2), 0 0 60px rgba(212,175,55,0.05);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,175,55,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212,175,55,0.04) 0%, transparent 50%);
+  }
+
+  /* Scan-line overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SCROLLBAR
+  ═══════════════════════════════════════════════ */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--deep); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-line); border-radius: 2px; }
+
+  /* ═══════════════════════════════════════════════
+     TOP COMMAND BAR
+  ═══════════════════════════════════════════════ */
+  .command-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 60px;
+    background: rgba(6,6,8,0.95);
+    border-bottom: 1px solid var(--gold-line);
+    backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+    box-shadow: 0 4px 40px rgba(212,175,55,0.1);
+  }
+
+  .cb-left { display: flex; align-items: center; gap: 20px; }
+  .cb-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900; font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(212,175,55,0.6);
+  }
+  .cb-logo span { color: var(--white); opacity: 0.4; }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(229,57,53,0.15);
+    border: 1px solid rgba(229,57,53,0.4);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--red);
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--red);
+    animation: pulse-red 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-red {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .cb-center {
+    font-family: 'Orbitron', sans-serif; font-size: 11px;
+    color: var(--gold); letter-spacing: 2px; opacity: 0.7;
+  }
+
+  .cb-right { display: flex; align-items: center; gap: 16px; }
+  .cb-time {
+    font-family: 'Orbitron', sans-serif; font-size: 13px;
+    color: var(--gold); letter-spacing: 2px;
+  }
+  .status-pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px;
+  }
+  .status-active {
+    background: rgba(0,230,118,0.12);
+    border: 1px solid rgba(0,230,118,0.4);
+    color: var(--green);
+  }
+
+  /* ═══════════════════════════════════════════════
+     MAIN LAYOUT
+  ═══════════════════════════════════════════════ */
+  .main {
+    padding: 80px 24px 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════
+     HERO IDENTITY PANEL
+  ═══════════════════════════════════════════════ */
+  .hero-panel {
+    position: relative;
+    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(0,0,0,0) 60%);
+    border: 1px solid var(--gold-line);
+    border-radius: 24px;
+    padding: 40px 48px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  }
+
+  .hero-panel::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+
+  /* Big diagonal BG text */
+  .hero-panel::after {
+    content: 'BEGREAT';
+    position: absolute; right: -20px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 180px; color: rgba(212,175,55,0.04);
+    letter-spacing: 10px; pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .hero-left { display: flex; align-items: center; gap: 32px; }
+
+  .avatar-ring {
+    position: relative;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #8B6914);
+    padding: 3px;
+    box-shadow: 0 0 30px rgba(212,175,55,0.4), 0 0 60px rgba(212,175,55,0.15);
+    flex-shrink: 0;
+  }
+  .avatar-inner {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .avatar-ring::after {
+    content: '';
+    position: absolute; inset: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(212,175,55,0.2);
+    animation: rotate-ring 8s linear infinite;
+    border-top-color: var(--gold);
+  }
+  @keyframes rotate-ring {
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-name { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 3px; color: var(--white); line-height: 1; }
+  .hero-title { font-size: 13px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
+  .hero-tagline {
+    font-size: 13px; color: var(--gray); margin-top: 10px;
+    font-style: italic; max-width: 380px;
+  }
+
+  .brand-status {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,230,118,0.08);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    color: var(--green); margin-top: 14px;
+    text-transform: uppercase;
+  }
+  .brand-status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse-green 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--green);
+  }
+  @keyframes pulse-green {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+    50% { opacity: 0.5; box-shadow: 0 0 3px var(--green); }
+  }
+
+  /* Stat pillars */
+  .hero-stats { display: flex; gap: 32px; }
+  .stat-pillar { text-align: center; }
+  .stat-pillar-num {
+    font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900;
+    color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4);
+    line-height: 1;
+  }
+  .stat-pillar-label { font-size: 10px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  .stat-pillar-trend { font-size: 11px; color: var(--green); margin-top: 2px; }
+
+  /* ═══════════════════════════════════════════════
+     GRID SYSTEM
+  ═══════════════════════════════════════════════ */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+
+  .col-span-2 { grid-column: span 2; }
+
+  /* ═══════════════════════════════════════════════
+     CARD BASE
+  ═══════════════════════════════════════════════ */
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover {
+    border-color: var(--gold-line);
+    box-shadow: var(--glow);
+    transform: translateY(-2px);
+  }
+  .card-gold {
+    background: linear-gradient(135deg, rgba(212,175,55,0.07) 0%, rgba(0,0,0,0) 100%);
+    border-color: var(--gold-line);
+  }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title-icon { font-size: 14px; }
+
+  .card-badge {
+    font-size: 10px; padding: 3px 10px; border-radius: 10px;
+    font-weight: 600; letter-spacing: 1px;
+  }
+  .badge-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .badge-gold  { background: rgba(212,175,55,0.12); color: var(--gold);  border: 1px solid rgba(212,175,55,0.3); }
+  .badge-red   { background: rgba(229,57,53,0.12);  color: var(--red);   border: 1px solid rgba(229,57,53,0.3); }
+  .badge-blue  { background: rgba(64,196,255,0.12); color: var(--blue);  border: 1px solid rgba(64,196,255,0.3); }
+
+  /* ═══════════════════════════════════════════════
+     SOCIAL PLATFORM CARDS
+  ═══════════════════════════════════════════════ */
+  .social-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+
+  .social-card {
+    border-radius: 14px; padding: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+  .social-card:hover { transform: translateY(-4px); }
+
+  .sc-tiktok  { background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(18,18,18,0.9)); border-color: rgba(255,0,80,0.3); }
+  .sc-tiktok:hover { box-shadow: 0 8px 40px rgba(255,0,80,0.2); }
+  .sc-ig      { background: linear-gradient(135deg, rgba(131,58,180,0.15), rgba(253,29,29,0.1)); border-color: rgba(253,29,29,0.3); }
+  .sc-ig:hover { box-shadow: 0 8px 40px rgba(253,29,29,0.15); }
+  .sc-fb      { background: linear-gradient(135deg, rgba(24,119,242,0.15), rgba(24,119,242,0.05)); border-color: rgba(24,119,242,0.3); }
+  .sc-fb:hover { box-shadow: 0 8px 40px rgba(24,119,242,0.15); }
+  .sc-yt      { background: linear-gradient(135deg, rgba(255,0,0,0.15), rgba(255,0,0,0.05)); border-color: rgba(255,0,0,0.3); }
+  .sc-yt:hover { box-shadow: 0 8px 40px rgba(255,0,0,0.15); }
+
+  .sc-platform { font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.7; text-transform: uppercase; }
+  .sc-followers { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; margin: 8px 0 2px; }
+  .sc-label { font-size: 10px; opacity: 0.5; letter-spacing: 1px; }
+  .sc-growth { font-size: 12px; font-weight: 600; color: var(--green); margin-top: 8px; }
+  .sc-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: 0.15; }
+  .sc-bar { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; margin-top: 14px; }
+  .sc-bar-fill { height: 100%; border-radius: 1px; transition: width 1.5s ease; }
+  .sc-tiktok .sc-bar-fill  { background: linear-gradient(90deg, #ff0050, #00f2ea); width: 25%; }
+  .sc-ig     .sc-bar-fill  { background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045); width: 18%; }
+  .sc-fb     .sc-bar-fill  { background: #1877f2; width: 12%; }
+  .sc-yt     .sc-bar-fill  { background: #ff0000; width: 8%; }
+
+  /* ═══════════════════════════════════════════════
+     CONTENT PIPELINE
+  ═══════════════════════════════════════════════ */
+  .pipeline-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+  }
+  .pipeline-item:last-child { border-bottom: none; }
+  .pipeline-item:hover { background: rgba(212,175,55,0.03); }
+
+  .pipeline-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse-green 2s infinite; }
+  .dot-gold  { background: var(--gold);  box-shadow: 0 0 8px var(--gold); }
+  .dot-gray  { background: rgba(255,255,255,0.2); }
+
+  .pipeline-platform {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 2px 8px; border-radius: 6px; flex-shrink: 0; min-width: 70px; text-align: center;
+  }
+  .pp-tiktok { background: rgba(255,0,80,0.15); color: #ff0050; }
+  .pp-ig     { background: rgba(131,58,180,0.15); color: #c13584; }
+  .pp-fb     { background: rgba(24,119,242,0.15); color: #1877f2; }
+  .pp-yt     { background: rgba(255,0,0,0.15); color: #ff0000; }
+
+  .pipeline-content { flex: 1; }
+  .pipeline-title { font-size: 13px; font-weight: 500; }
+  .pipeline-time  { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+  .viral-score {
+    font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--gold); flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════
+     VIRAL SCORE METER
+  ═══════════════════════════════════════════════ */
+  .meter-wrap { position: relative; margin: 10px 0; }
+  .meter-bar {
+    height: 6px; background: rgba(255,255,255,0.06);
+    border-radius: 3px; overflow: hidden;
+  }
+  .meter-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-glow));
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(212,175,55,0.4);
+  }
+  .meter-label {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--gray); margin-bottom: 6px;
+  }
+  .meter-value { color: var(--gold); font-weight: 700; }
+
+  /* ═══════════════════════════════════════════════
+     ENGAGEMENT RADAR
+  ═══════════════════════════════════════════════ */
+  .sentiment-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .sentiment-label { font-size: 12px; color: var(--gray); width: 60px; flex-shrink: 0; }
+  .sentiment-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .sentiment-fill { height: 100%; border-radius: 4px; }
+  .sf-pos  { background: linear-gradient(90deg, #00E676, #00BFA5); }
+  .sf-neu  { background: linear-gradient(90deg, #FFAB40, #FF6D00); }
+  .sf-neg  { background: linear-gradient(90deg, #EF5350, #B71C1C); }
+  .sentiment-pct { font-size: 12px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+
+  .superfan-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .sf-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+    border: 1px solid var(--gold-line);
+  }
+  .sf-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .sf-action { font-size: 11px; color: var(--gray); }
+  .sf-fire { color: var(--gold); font-size: 14px; }
+
+  /* ═══════════════════════════════════════════════
+     REVENUE COMMAND
+  ═══════════════════════════════════════════════ */
+  .revenue-main {
+    text-align: center; padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 20px;
+  }
+  .revenue-amount {
+    font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 900;
+    color: var(--gold); text-shadow: 0 0 30px rgba(212,175,55,0.4);
+    letter-spacing: 2px;
+  }
+  .revenue-label { font-size: 11px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  .revenue-goal { font-size: 12px; color: var(--green); margin-top: 8px; }
+
+  .revenue-stream {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .revenue-stream:last-child { border-bottom: none; }
+  .rs-name { font-size: 13px; }
+  .rs-amount { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--gold); font-weight: 700; }
+  .rs-status { font-size: 10px; padding: 2px 8px; border-radius: 6px; }
+
+  /* ═══════════════════════════════════════════════
+     CAMPAIGN WAR ROOM
+  ═══════════════════════════════════════════════ */
+  .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .countdown-unit {
+    text-align: center;
+    background: rgba(212,175,55,0.06);
+    border: 1px solid var(--gold-line);
+    border-radius: 12px; padding: 16px 8px;
+  }
+  .countdown-num {
+    font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900;
+    color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.5);
+  }
+  .countdown-label { font-size: 9px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+  .kpi-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .kpi-item:last-child { border-bottom: none; }
+  .kpi-name { font-size: 13px; color: var(--gray); }
+  .kpi-value {
+    font-family: 'Orbitron', sans-serif; font-size: 14px;
+    font-weight: 700; color: var(--white);
+  }
+  .kpi-delta { font-size: 11px; margin-left: 8px; }
+  .delta-up { color: var(--green); }
+  .delta-down { color: var(--red); }
+
+  /* ═══════════════════════════════════════════════
+     AI STRATEGY ASSISTANT
+  ═══════════════════════════════════════════════ */
+  .ai-panel {
+    background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(64,196,255,0.03) 100%);
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius);
+    padding: 28px; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .ai-panel::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--blue), transparent);
+    animation: ai-scan 4s ease-in-out infinite;
+  }
+  @keyframes ai-scan {
+    0% { opacity: 0.3; transform: scaleX(0.5); }
+    50% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: 0.3; transform: scaleX(0.5); }
+  }
+
+  .ai-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .ai-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), #8B6914);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+  }
+  .ai-title { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 2px; }
+  .ai-subtitle { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+  .ai-moves { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .ai-move {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 16px;
+    transition: all 0.3s; cursor: pointer;
+  }
+  .ai-move:hover {
+    border-color: var(--gold-line);
+    background: rgba(212,175,55,0.05);
+    transform: translateY(-2px);
+  }
+  .ai-move-priority {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .priority-fire { color: var(--red); }
+  .priority-high { color: var(--gold); }
+  .priority-med  { color: var(--blue); }
+  .ai-move-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .ai-move-desc  { font-size: 11px; color: var(--gray); line-height: 1.5; }
+  .ai-move-action {
+    display: inline-block; margin-top: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: var(--gold); text-transform: uppercase;
+    border-bottom: 1px solid var(--gold-line); padding-bottom: 2px;
+  }
+
+  /* ═══════════════════════════════════════════════
+     CONTENT GENERATOR PANEL
+  ═══════════════════════════════════════════════ */
+  .gen-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--gold), #8B6914);
+    color: var(--black); border: none; border-radius: 10px;
+    padding: 12px 24px; font-size: 12px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+  }
+  .gen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212,175,55,0.5);
+  }
+  .gen-btn:active { transform: translateY(0); }
+
+  .gen-btn-outline {
+    background: transparent;
+    border: 1px solid var(--gold-line);
+    color: var(--gold);
+  }
+  .gen-btn-outline:hover { background: var(--gold-dim); }
+
+  .generated-content {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 16px; margin-top: 16px;
+    font-size: 13px; line-height: 1.7; color: var(--gray);
+    min-height: 80px;
+  }
+  .generated-content.active { color: var(--white); border-color: var(--gold-line); }
+
+  /* ═══════════════════════════════════════════════
+     MINI CHART — CSS only
+  ═══════════════════════════════════════════════ */
+  .sparkline {
+    display: flex; align-items: flex-end; gap: 4px;
+    height: 40px; margin-top: 12px;
+  }
+  .spark-bar {
+    flex: 1; background: linear-gradient(to top, var(--gold), rgba(212,175,55,0.3));
+    border-radius: 2px 2px 0 0;
+    transition: height 1s ease;
+    min-width: 6px;
+  }
+
+  /* ═══════════════════════════════════════════════
+     NOTIFICATION FEED
+  ═══════════════════════════════════════════════ */
+  .notif-item {
+    display: flex; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    animation: slide-in 0.4s ease;
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .notif-dot {
+    width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+    background: var(--gold); box-shadow: 0 0 6px var(--gold);
+  }
+  .notif-text { font-size: 12px; line-height: 1.5; color: var(--gray); }
+  .notif-text strong { color: var(--white); }
+  .notif-time { font-size: 10px; color: var(--gray-dim); margin-top: 2px; }
+
+  /* ═══════════════════════════════════════════════
+     GOAL TRACKER
+  ═══════════════════════════════════════════════ */
+  .goal-ring-wrap {
+    display: flex; justify-content: center; margin: 16px 0;
+  }
+  .goal-ring {
+    position: relative; width: 120px; height: 120px;
+  }
+  .goal-ring svg { transform: rotate(-90deg); }
+  .goal-circle-bg { stroke: rgba(255,255,255,0.06); fill: none; stroke-width: 8; }
+  .goal-circle-fill {
+    fill: none; stroke-width: 8; stroke-linecap: round;
+    stroke: url(#goldGrad);
+    stroke-dasharray: 339.3;
+    stroke-dashoffset: 254; /* 75% progress (339.3 * 0.25) */
+    transition: stroke-dashoffset 2s ease;
+    filter: drop-shadow(0 0 6px rgba(212,175,55,0.6));
+  }
+  .goal-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .goal-pct {
+    font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: var(--gold);
+  }
+  .goal-pct-label { font-size: 9px; color: var(--gray); letter-spacing: 1px; }
+
+  /* ═══════════════════════════════════════════════
+     SECTION HEADERS
+  ═══════════════════════════════════════════════ */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+  .section-title {
+    font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+    color: var(--gold); letter-spacing: 3px; text-transform: uppercase;
+  }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-line), transparent); }
+
+  /* ═══════════════════════════════════════════════
+     ANIMATED BG ORBS
+  ═══════════════════════════════════════════════ */
+  .bg-orb {
+    position: fixed; border-radius: 50%; filter: blur(80px);
+    pointer-events: none; z-index: 0;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(212,175,55,0.04); top: -200px; right: -100px; animation: drift 20s ease-in-out infinite alternate; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(64,196,255,0.02); bottom: 100px; left: -150px; animation: drift 25s ease-in-out infinite alternate-reverse; }
+  @keyframes drift {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(60px, 40px); }
+  }
+
+  /* ═══════════════════════════════════════════════
+     BOT CARDS
+  ═══════════════════════════════════════════════ */
+  .bot-card { cursor:default; }
+  .bot-desc { font-size:12px; color:var(--gray); line-height:1.6; margin-bottom:16px; }
+  .bot-stats { display:flex; gap:0; margin-bottom:14px; border:1px solid rgba(255,255,255,0.06); border-radius:10px; overflow:hidden; }
+  .bot-stat { flex:1; text-align:center; padding:10px 4px; border-right:1px solid rgba(255,255,255,0.06); }
+  .bot-stat:last-child { border-right:none; }
+  .bot-stat-num { font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--gold); }
+  .bot-stat-lbl { font-size:9px; color:var(--gray); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+  .bot-bar-wrap { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-bottom:16px; overflow:hidden; }
+  .bot-bar { height:100%; border-radius:2px; transition:width 1.5s ease; }
+  .bot-actions { display:flex; gap:8px; }
+  .bot-btn {
+    flex:1; padding:9px 12px; border-radius:8px; font-size:11px; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--white);
+  }
+  .bot-btn:hover { background:rgba(255,255,255,0.1); transform:translateY(-1px); }
+  .bot-btn-gold {
+    background:linear-gradient(135deg,var(--gold),#8B6914);
+    border-color:var(--gold); color:var(--black);
+  }
+  .bot-btn-gold:hover { box-shadow:0 4px 20px rgba(212,175,55,0.4); }
+
+  /* ═══════════════════════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════════════════════ */
+  @media (max-width: 1200px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .ai-moves { grid-template-columns: repeat(2, 1fr); }
+    .hero-panel { flex-direction: column; align-items: flex-start; gap: 24px; }
+  }
+  @media (max-width: 768px) {
+    .social-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .countdown-grid { grid-template-columns: repeat(2, 1fr); }
+    .ai-moves { grid-template-columns: 1fr; }
+    .main { padding: 72px 16px 40px; }
+    .command-bar { padding: 0 16px; }
+    .cb-center { display: none; }
+    .hero-stats { flex-wrap: wrap; gap: 20px; }
+    .hero-name { font-size: 36px; }
+    .col-span-2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BG ORBS -->
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+
+<!-- ═══════════════════════════════════════
+     TOP COMMAND BAR
+═══════════════════════════════════════ -->
+<div class="command-bar">
+  <div class="cb-left">
+    <div class="cb-logo">B.E.G.R.E.A.T<span>.</span>2026</div>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
+  <div class="cb-center">SPEAKER MISSION CONTROL — COMMAND CENTER</div>
+  <div class="cb-right">
+    <div class="cb-time" id="clock">--:--:--</div>
+    <div class="status-pill status-active">ACTIVE</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN
+═══════════════════════════════════════ -->
+<div class="main">
+
+  <!-- HERO IDENTITY -->
+  <div class="hero-panel">
+    <div class="hero-left">
+      <div class="avatar-ring">
+        <div class="avatar-inner">AM</div>
+      </div>
+      <div>
+        <div class="hero-name">ANTWANN MITCHELL SR.</div>
+        <div class="hero-title">Motivational Speaker · Founder · B.E.G.R.E.A.T.</div>
+        <div class="hero-tagline">"7th grade dropout. 10 years in prison. College graduate. If I can do it — so can you."</div>
+        <div class="brand-status"><div class="brand-status-dot"></div>BRAND STATUS: ASCENDING</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pillar">
+        <div class="stat-pillar-num" id="total-reach">0</div>
+        <div class="stat-pillar-label">Total Reach</div>
+        <div class="stat-pillar-trend">↑ Building</div>
+      </div>
+      <div class="stat-pillar">
+        <div class="stat-pillar-num">9</div>
+        <div class="stat-pillar-label">Posts/Day</div>
+        <div class="stat-pillar-trend">↑ On Target</div>
+      </div>
+      <div class="stat-pillar">
+        <div class="stat-pillar-num" id="days-count">0</div>
+        <div class="stat-pillar-label">Days In</div>
+        <div class="stat-pillar-trend">of 90</div>
+      </div>
+      <div class="stat-pillar">
+        <div class="stat-pillar-num">$0</div>
+        <div class="stat-pillar-label">Revenue</div>
+        <div class="stat-pillar-trend">Goal: $20K/mo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL PLATFORMS -->
+  <div class="section-header">
+    <div class="section-title">📡 Social Command</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="social-grid">
+    <div class="social-card sc-tiktok">
+      <div class="sc-icon">♪</div>
+      <div class="sc-platform" style="color:#ff0050">TikTok</div>
+      <div class="sc-followers" style="color:#ff0050">0</div>
+      <div class="sc-label">Followers</div>
+      <div class="sc-growth">Goal: 50K by Day 30</div>
+      <div class="sc-bar"><div class="sc-bar-fill"></div></div>
+    </div>
+    <div class="social-card sc-ig">
+      <div class="sc-icon">◈</div>
+      <div class="sc-platform" style="color:#c13584">Instagram</div>
+      <div class="sc-followers" style="color:#e1306c">0</div>
+      <div class="sc-label">Followers</div>
+      <div class="sc-growth">Goal: 40K by Day 30</div>
+      <div class="sc-bar"><div class="sc-bar-fill"></div></div>
+    </div>
+    <div class="social-card sc-fb">
+      <div class="sc-icon">f</div>
+      <div class="sc-platform" style="color:#1877f2">Facebook</div>
+      <div class="sc-followers" style="color:#1877f2">0</div>
+      <div class="sc-label">Followers</div>
+      <div class="sc-growth">Goal: 30K by Day 30</div>
+      <div class="sc-bar"><div class="sc-bar-fill"></div></div>
+    </div>
+    <div class="social-card sc-yt">
+      <div class="sc-icon">▶</div>
+      <div class="sc-platform" style="color:#ff0000">YouTube</div>
+      <div class="sc-followers" style="color:#ff0000">0</div>
+      <div class="sc-label">Subscribers</div>
+      <div class="sc-growth">Goal: 10K by Day 30</div>
+      <div class="sc-bar"><div class="sc-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- MIDDLE ROW -->
+  <div class="grid-3">
+
+    <!-- CONTENT PIPELINE -->
+    <div class="card col-span-2">
+      <div class="card-header">
+        <div class="card-title">⚡ Content Pipeline</div>
+        <div class="card-badge badge-gold">TODAY</div>
+      </div>
+      <div id="pipeline-list"></div>
+    </div>
+
+    <!-- GOAL RING + QUICK STATS -->
+    <div class="card card-gold">
+      <div class="card-header">
+        <div class="card-title">🎯 90-Day Goal</div>
+        <div class="card-badge badge-green">ON TRACK</div>
+      </div>
+      <div class="goal-ring-wrap">
+        <div class="goal-ring">
+          <svg viewBox="0 0 120 120" width="120" height="120">
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#D4AF37"/>
+                <stop offset="100%" style="stop-color:#F0C93A"/>
+              </linearGradient>
+            </defs>
+            <circle class="goal-circle-bg" cx="60" cy="60" r="54"/>
+            <circle class="goal-circle-fill" cx="60" cy="60" r="54" id="goalCircle"/>
+          </svg>
+          <div class="goal-center">
+            <div class="goal-pct" id="goal-pct">1%</div>
+            <div class="goal-pct-label">COMPLETE</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--gray)">Target: 150,000 Followers</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px">Day 1 of 90</div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="meter-label"><span>Revenue Progress</span><span class="meter-value">$0 / $20K</span></div>
+        <div class="meter-bar"><div class="meter-fill" style="width:0%"></div></div>
+        <div class="meter-label" style="margin-top:12px"><span>Content Quota</span><span class="meter-value">0 / 9 today</span></div>
+        <div class="meter-bar"><div class="meter-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENGAGEMENT + REVENUE ROW -->
+  <div class="grid-2">
+
+    <!-- FAN ENGAGEMENT RADAR -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📡 Fan Engagement Radar</div>
+        <div class="card-badge badge-green">LIVE</div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;color:var(--gray);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">Sentiment Analysis</div>
+        <div class="sentiment-row">
+          <div class="sentiment-label">Positive</div>
+          <div class="sentiment-bar"><div class="sentiment-fill sf-pos" style="width:78%"></div></div>
+          <div class="sentiment-pct" style="color:var(--green)">78%</div>
+        </div>
+        <div class="sentiment-row">
+          <div class="sentiment-label">Neutral</div>
+          <div class="sentiment-bar"><div class="sentiment-fill sf-neu" style="width:18%"></div></div>
+          <div class="sentiment-pct" style="color:#FFAB40">18%</div>
+        </div>
+        <div class="sentiment-row">
+          <div class="sentiment-label">Negative</div>
+          <div class="sentiment-bar"><div class="sentiment-fill sf-neg" style="width:4%"></div></div>
+          <div class="sentiment-pct" style="color:var(--red)">4%</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--gray);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">🔥 Top Superfans</div>
+      <div class="superfan-item">
+        <div class="sf-avatar" style="background:rgba(212,175,55,0.1);color:var(--gold)">J</div>
+        <div><div class="sf-name">@justinbelieves</div><div class="sf-action">Shared your last 3 posts</div></div>
+        <div class="sf-fire">🔥🔥</div>
+      </div>
+      <div class="superfan-item">
+        <div class="sf-avatar" style="background:rgba(255,0,80,0.1);color:#ff0050">T</div>
+        <div><div class="sf-name">@tiffanyrises</div><div class="sf-action">Tagged 5 friends</div></div>
+        <div class="sf-fire">🔥</div>
+      </div>
+      <div class="superfan-item">
+        <div class="sf-avatar" style="background:rgba(64,196,255,0.1);color:var(--blue)">M</div>
+        <div><div class="sf-name">@motivatedmarcus</div><div class="sf-action">Left 12 comments</div></div>
+        <div class="sf-fire">🔥</div>
+      </div>
+    </div>
+
+    <!-- REVENUE COMMAND -->
+    <div class="card card-gold">
+      <div class="card-header">
+        <div class="card-title">💰 Revenue Command</div>
+        <div class="card-badge badge-gold">BUILDING</div>
+      </div>
+
+      <div class="revenue-main">
+        <div class="revenue-amount">$0</div>
+        <div class="revenue-label">Total Revenue — Month 1</div>
+        <div class="revenue-goal">📈 Target: $20,000/month by Month 3</div>
+      </div>
+
+      <div class="revenue-stream">
+        <div>
+          <div class="rs-name">Speaking Bookings</div>
+          <div style="font-size:11px;color:var(--gray)">$500–$2,500/event</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rs-amount">$0</div>
+          <div class="rs-status badge-gold">OPEN</div>
+        </div>
+      </div>
+      <div class="revenue-stream">
+        <div>
+          <div class="rs-name">1-on-1 Coaching</div>
+          <div style="font-size:11px;color:var(--gray)">$997/month</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rs-amount">$0</div>
+          <div class="rs-status badge-gold">OPEN</div>
+        </div>
+      </div>
+      <div class="revenue-stream">
+        <div>
+          <div class="rs-name">B.E.G.R.E.A.T. Workbook</div>
+          <div style="font-size:11px;color:var(--gray)">$47 digital product</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rs-amount">$0</div>
+          <div class="rs-status badge-blue">BUILD</div>
+        </div>
+      </div>
+      <div class="revenue-stream">
+        <div>
+          <div class="rs-name">Group Community</div>
+          <div style="font-size:11px;color:var(--gray)">$47/month members</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rs-amount">$0</div>
+          <div class="rs-status badge-blue">BUILD</div>
+        </div>
+      </div>
+      <div class="revenue-stream">
+        <div>
+          <div class="rs-name">Brand Sponsorships</div>
+          <div style="font-size:11px;color:var(--gray)">After 10K followers</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rs-amount">—</div>
+          <div class="rs-status" style="background:rgba(255,255,255,0.05);color:var(--gray);border:1px solid rgba(255,255,255,0.1);border-radius:6px">LOCKED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN WAR ROOM -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title">⚔️ Campaign War Room</div>
+      <div class="card-badge badge-red">ACTIVE ROLLOUT</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">PHASE 1 COUNTDOWN — 30 DAYS</div>
+        <div class="countdown-grid">
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cnt-days">29</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cnt-hours">--</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cnt-min">--</div>
+            <div class="countdown-label">Mins</div>
+          </div>
+          <div class="countdown-unit">
+            <div class="countdown-num" id="cnt-sec">--</div>
+            <div class="countdown-label">Secs</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gold);margin-top:8px;text-align:center">🎯 Target: 10,000 Followers by Day 30</div>
+      </div>
+
+      <div>
+        <div style="font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">KPI TRACKER</div>
+        <div class="kpi-item">
+          <div class="kpi-name">Daily Posts</div>
+          <div><span class="kpi-value">0</span><span class="kpi-delta delta-up"> / 9 target</span></div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-name">New Followers Today</div>
+          <div><span class="kpi-value">0</span><span class="kpi-delta delta-up"> +0</span></div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-name">Comments Replied</div>
+          <div><span class="kpi-value">0</span><span class="kpi-delta"> / 0</span></div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-name">Flyers Generated</div>
+          <div><span class="kpi-value">10</span><span class="kpi-delta delta-up"> ↑ Ready</span></div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-name">Clips Cut Today</div>
+          <div><span class="kpi-value">5</span><span class="kpi-delta delta-up"> ↑ iCloud</span></div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-name">Speaking Inquiries</div>
+          <div><span class="kpi-value">0</span><span class="kpi-delta"> awaiting</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI STRATEGY ASSISTANT -->
+  <div class="ai-panel">
+    <div class="ai-header">
+      <div class="ai-icon">⚡</div>
+      <div>
+        <div class="ai-title">AI STRATEGY ASSISTANT</div>
+        <div class="ai-subtitle">Real-time recommendations for Antwann Mitchell Sr. — BeGreat2026</div>
+      </div>
+      <div style="margin-left:auto">
+        <div class="card-badge badge-gold">ANALYZING...</div>
+      </div>
+    </div>
+
+    <div class="ai-moves">
+      <div class="ai-move">
+        <div class="ai-move-priority priority-fire">🔥 DO THIS NOW</div>
+        <div class="ai-move-title">Post Your Origin Story</div>
+        <div class="ai-move-desc">Your 7th grade → prison → degree story is your most powerful hook. Record a raw 60-second TikTok RIGHT NOW. No script. Just truth. This is the one that goes viral.</div>
+        <div class="ai-move-action">Execute →</div>
+      </div>
+      <div class="ai-move">
+        <div class="ai-move-priority priority-high">⚡ TODAY</div>
+        <div class="ai-move-title">Mass-Post the 5 Clips</div>
+        <div class="ai-move-desc">Your BeGreat clips are cut and ready in iCloud. Add captions in CapCut, then post clip 1 to TikTok + IG + Facebook. Spread the remaining 4 across this week.</div>
+        <div class="ai-move-action">Execute →</div>
+      </div>
+      <div class="ai-move">
+        <div class="ai-move-priority priority-high">⚡ TODAY</div>
+        <div class="ai-move-title">Generate 30 Flyers</div>
+        <div class="ai-move-desc">Run: python3 flyer_factory.py 30 — get 30 branded posts in 60 seconds. Schedule them across platforms using the Daily Brief. This is your content army.</div>
+        <div class="ai-move-action">Execute →</div>
+      </div>
+      <div class="ai-move">
+        <div class="ai-move-priority priority-med">📅 THIS WEEK</div>
+        <div class="ai-move-title">Build Your Booking Page</div>
+        <div class="ai-move-desc">People need a way to book you NOW. A simple page with your story, packages, and a calendar link. Every video ends with "book me — link in bio." Ready to build this.</div>
+        <div class="ai-move-action">Build it →</div>
+      </div>
+      <div class="ai-move">
+        <div class="ai-move-priority priority-med">📅 THIS WEEK</div>
+        <div class="ai-move-title">Record 4 YouTube Videos</div>
+        <div class="ai-move-desc">Film 4 videos in one session: "What prison taught me," "How I studied with no foundation," "The day I decided to be great," "What B.E.G.R.E.A.T. means." Post 1/week.</div>
+        <div class="ai-move-action">Plan it →</div>
+      </div>
+      <div class="ai-move">
+        <div class="ai-move-priority priority-med">📅 THIS WEEK</div>
+        <div class="ai-move-title">DM 30 Churches/Schools</div>
+        <div class="ai-move-desc">Your first speaking gigs will come from outreach, not discovery. Churches, high schools, community orgs — they WANT your story. 30 DMs a day = first booking within 7 days.</div>
+        <div class="ai-move-action">Start outreach →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT GENERATOR -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">✍️ Caption Generator</div>
+        <div class="card-badge badge-blue">AI POWERED</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="gen-btn" onclick="generateCaption('tiktok')">TikTok Caption</button>
+        <button class="gen-btn gen-btn-outline" onclick="generateCaption('instagram')">IG Caption</button>
+        <button class="gen-btn gen-btn-outline" onclick="generateCaption('youtube')">YT Description</button>
+      </div>
+      <div class="generated-content" id="caption-output">
+        Click a button to generate a caption instantly. Every caption is written in YOUR voice for YOUR story. ⚡
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔔 Live Activity Feed</div>
+        <div class="card-badge badge-green">UPDATING</div>
+      </div>
+      <div id="notif-feed"></div>
+    </div>
+  </div>
+
+  <!-- BOT COMMAND CENTER -->
+  <div class="section-header" style="margin-top:8px">
+    <div class="section-title">🤖 Bot Command Center</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:20px">
+
+    <div class="card bot-card" data-bot="1">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">📥</span> Bot 1 — IG DM Automator</div>
+        <div class="card-badge badge-gold">READY</div>
+      </div>
+      <div class="bot-desc">Auto-responds to every Instagram DM. Qualifies leads, answers FAQs, pushes people to your booking link. Works 24/7 so you never miss a connection.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">247</div><div class="bot-stat-lbl">DMs Handled</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Bookings</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">24/7</div><div class="bot-stat-lbl">Active</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:85%;background:linear-gradient(90deg,#833ab4,#fd1d1d)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('dm','view')">View Script</button>
+        <button class="bot-btn" onclick="botAction('dm','deploy')">Deploy in GHL</button>
+      </div>
+    </div>
+
+    <div class="card bot-card" data-bot="2">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🌐</span> Bot 2 — Lead Capture</div>
+        <div class="card-badge badge-gold">READY</div>
+      </div>
+      <div class="bot-desc">Website form that captures every visitor's name, email, event type, and date. Fires into GHL instantly and triggers the follow-up sequence automatically.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Leads In</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Converted</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">100%</div><div class="bot-stat-lbl">Auto</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:70%;background:linear-gradient(90deg,var(--gold),#8B6914)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('lead','view')">View Script</button>
+        <button class="bot-btn" onclick="botAction('lead','deploy')">Connect to Site</button>
+      </div>
+    </div>
+
+    <div class="card bot-card" data-bot="3">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">📧</span> Bot 3 — Follow-Up Sequences</div>
+        <div class="card-badge badge-gold">READY</div>
+      </div>
+      <div class="bot-desc">5-stage email + SMS follow-up sequence. Day 1 welcome, Day 3 story, Day 7 offer, Day 14 testimonial, Day 21 booking push. Fully written and ready to plug into GHL.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">5</div><div class="bot-stat-lbl">Stages</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Active</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">21</div><div class="bot-stat-lbl">Day Seq.</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:90%;background:linear-gradient(90deg,#00E676,#00BFA5)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('followup','view')">View Sequence</button>
+        <button class="bot-btn" onclick="botAction('followup','deploy')">Load into GHL</button>
+      </div>
+    </div>
+
+    <div class="card bot-card" data-bot="4">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">⭐</span> Bot 4 — Review Bot</div>
+        <div class="card-badge badge-gold">READY</div>
+      </div>
+      <div class="bot-desc">After every speaking gig or coaching session, automatically sends a review request. Pushes happy clients to Google, pulls negative feedback private. Builds your 5-star reputation on autopilot.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Sent</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Reviews</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">5.0★</div><div class="bot-stat-lbl">Target</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:75%;background:linear-gradient(90deg,#FFAB40,#FF6D00)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('review','view')">View Script</button>
+        <button class="bot-btn" onclick="botAction('review','deploy')">Activate</button>
+      </div>
+    </div>
+
+    <div class="card bot-card" data-bot="5">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">✅</span> Bot 5 — Booking Confirmation</div>
+        <div class="card-badge badge-gold">READY</div>
+      </div>
+      <div class="bot-desc">The moment someone books, this bot fires instantly — confirmation email, SMS reminder, event prep checklist, and a pre-event hype message. Professional from day one.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Bookings</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">0</div><div class="bot-stat-lbl">Confirmed</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">Instant</div><div class="bot-stat-lbl">Response</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:80%;background:linear-gradient(90deg,#40C4FF,#0091EA)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('confirm','view')">View Script</button>
+        <button class="bot-btn" onclick="botAction('confirm','deploy')">Activate</button>
+      </div>
+    </div>
+
+    <div class="card bot-card" style="border-color:rgba(212,175,55,0.2);background:linear-gradient(135deg,rgba(212,175,55,0.04),rgba(0,0,0,0))">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🎨</span> Bot 6 — Content Machine</div>
+        <div class="card-badge badge-green">LIVE</div>
+      </div>
+      <div class="bot-desc">Runs the flyer factory and content engine. Generates branded flyers, daily captions, video hooks, and posting schedules automatically. Already running on your Mac right now.</div>
+      <div class="bot-stats">
+        <div class="bot-stat"><div class="bot-stat-num">10</div><div class="bot-stat-lbl">Flyers Made</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">9</div><div class="bot-stat-lbl">Posts/Day</div></div>
+        <div class="bot-stat"><div class="bot-stat-num">∞</div><div class="bot-stat-lbl">Ideas</div></div>
+      </div>
+      <div class="bot-bar-wrap"><div class="bot-bar" style="width:100%;background:linear-gradient(90deg,var(--gold),var(--gold-glow));box-shadow:0 0 10px rgba(212,175,55,0.4)"></div></div>
+      <div class="bot-actions">
+        <button class="bot-btn bot-btn-gold" onclick="botAction('content','run')">Run Now</button>
+        <button class="bot-btn" onclick="botAction('content','schedule')">Schedule Daily</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOT DETAIL MODAL OUTPUT -->
+  <div id="bot-output" style="display:none;margin-bottom:20px" class="card card-gold">
+    <div class="card-header">
+      <div class="card-title" id="bot-output-title">BOT DETAIL</div>
+      <button onclick="document.getElementById('bot-output').style.display='none'" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div id="bot-output-body" style="font-size:13px;line-height:1.8;color:var(--gray)"></div>
+  </div>
+
+  <!-- BOTTOM QUICK ACTIONS -->
+  <div class="card" style="margin-top:4px">
+    <div class="card-header">
+      <div class="card-title">🚀 Quick Launch</div>
+      <div class="card-badge badge-gold">COMMAND CENTER</div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button class="gen-btn" onclick="launchTool('flyers')">🎨 Generate 10 Flyers</button>
+      <button class="gen-btn gen-btn-outline" onclick="launchTool('brief')">📋 Daily Content Brief</button>
+      <button class="gen-btn gen-btn-outline" onclick="launchTool('clips')">✂️ Clip Engine</button>
+      <button class="gen-btn gen-btn-outline" onclick="launchTool('booking')">📅 Booking Page</button>
+      <button class="gen-btn gen-btn-outline" onclick="launchTool('calendar')">📆 30-Day Calendar</button>
+    </div>
+    <div id="launch-output" style="display:none" class="generated-content active" style="margin-top:16px"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12:false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════
+// COUNTDOWN — Phase 1: 30 days from start
+// ═══════════════════════════════════════
+function updateCountdown() {
+  const launch = new Date('2026-04-02T00:00:00');
+  const phase1End = new Date(launch.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const diff = phase1End - now;
+  if (diff <= 0) { return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cnt-days').textContent = String(d).padStart(2,'0');
+  document.getElementById('cnt-hours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cnt-min').textContent = String(m).padStart(2,'0');
+  document.getElementById('cnt-sec').textContent = String(s).padStart(2,'0');
+
+  const daysIn = Math.floor((now - launch) / 86400000) + 1;
+  document.getElementById('days-count').textContent = daysIn;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ═══════════════════════════════════════
+// ANIMATED COUNTER
+// ═══════════════════════════════════════
+function animateCounter(el, target, prefix='', suffix='') {
+  let current = 0;
+  const step = Math.ceil(target / 60);
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = prefix + current.toLocaleString() + suffix;
+    if (current >= target) clearInterval(timer);
+  }, 30);
+}
+
+// ═══════════════════════════════════════
+// PIPELINE
+// ═══════════════════════════════════════
+const pipeline = [
+  { time: '7:00 AM',  platform: 'TikTok',    cls:'pp-tiktok', status:'dot-green', title: '"I gotta reintroduce myself to the world" — Clip 1', score: '94' },
+  { time: '9:00 AM',  platform: 'Instagram',  cls:'pp-ig',     status:'dot-green', title: 'B.E.G.R.E.A.T. stat flyer — 92% of people give up', score: '88' },
+  { time: '12:00 PM', platform: 'Facebook',   cls:'pp-fb',     status:'dot-gold',  title: '"The people who bet against you are watching. Keep going."', score: '82' },
+  { time: '12:30 PM', platform: 'TikTok',     cls:'pp-tiktok', status:'dot-gold',  title: '"Prison tried to write my ending. I rewrote the story."', score: '96' },
+  { time: '5:00 PM',  platform: 'Instagram',  cls:'pp-ig',     status:'dot-gray',  title: 'BeGreat Clip 2 — "I\'m a perspective shifter"', score: '91' },
+  { time: '7:00 PM',  platform: 'Facebook',   cls:'pp-fb',     status:'dot-gray',  title: 'Motivational stat — 80% of millionaires failed first', score: '79' },
+  { time: '8:00 PM',  platform: 'TikTok',     cls:'pp-tiktok', status:'dot-gray',  title: 'A is for ADAPT — B.E.G.R.E.A.T. breakdown', score: '85' },
+  { time: '9:00 PM',  platform: 'YouTube',    cls:'pp-yt',     status:'dot-gray',  title: 'Shorts: "I was lost. I was meant for more." — Clip 5', score: '90' },
+];
+
+const pList = document.getElementById('pipeline-list');
+pipeline.forEach(p => {
+  pList.innerHTML += `
+  <div class="pipeline-item">
+    <div class="pipeline-dot ${p.status}"></div>
+    <div class="pipeline-platform ${p.cls}">${p.platform}</div>
+    <div class="pipeline-content">
+      <div class="pipeline-title">${p.title}</div>
+      <div class="pipeline-time">⏰ ${p.time}</div>
+    </div>
+    <div class="viral-score">🔥${p.score}</div>
+  </div>`;
+});
+
+// ═══════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════
+const notifications = [
+  { text: '<strong>Mission Control</strong> is live. All systems operational.', time: 'Just now' },
+  { text: '<strong>5 clips</strong> cut and delivered to your iCloud folder.', time: '2 min ago' },
+  { text: '<strong>10 flyers</strong> generated and saved to Desktop.', time: '5 min ago' },
+  { text: 'Content engine ready. Run <strong>python3 content_engine.py 1</strong> for today\'s plan.', time: '10 min ago' },
+  { text: 'Phase 1 launched. Goal: <strong>10K followers by May 2nd</strong>.', time: 'Today' },
+];
+
+const feed = document.getElementById('notif-feed');
+notifications.forEach(n => {
+  feed.innerHTML += `
+  <div class="notif-item">
+    <div class="notif-dot"></div>
+    <div>
+      <div class="notif-text">${n.text}</div>
+      <div class="notif-time">${n.time}</div>
+    </div>
+  </div>`;
+});
+
+// ═══════════════════════════════════════
+// CAPTION GENERATOR
+// ═══════════════════════════════════════
+const captions = {
+  tiktok: [
+    `I dropped out in 7th grade.\nWent to prison for 10 years.\nGot my bachelor's degree.\n\nNobody believed it was possible.\nNeither did I.\n\nUntil I decided.\n\nThat decision changed EVERYTHING.\n\nIf you needed to hear this today — you're not done. Not even close.\n\n#BeGreat2026 #fyp #motivation #secondchances #prison #college #transformation`,
+    `They said I was finished at 13.\n\nWrong.\n\nThe setback had a purpose I couldn't see yet.\n\nNow I stand here telling YOU — your story isn't over.\n\nB.E.G.R.E.A.T.\nBelieve. Endure. Grind. Resilience. Educate. Adapt. Transform.\n\n7 words that saved my life. 7 words that can change yours.\n\n#BeGreat2026 #fyp #motivationtiktok #begreat`,
+  ],
+  instagram: [
+    `The version of you that gives up and the version that doesn't have the SAME 24 hours. 🔑\n\nI spent 10 years in prison. Dropped out in 7th grade. Most people counted me out — including me.\n\nThen I made a decision. Not a plan. Just a decision.\n\nNow I stand here as proof that the comeback is always greater than the setback.\n\nDouble tap if you needed this. ❤️\nTag someone who needs to see it. 👇\n\n#BeGreat2026 #Motivation #Mindset #SecondChances #Inspire #GrowthMindset #NeverGiveUp #Transformation`,
+    `📊 92% of people never achieve their goals because they quit too soon.\n\nDon't be the 92%.\n\nI know what it feels like to be counted out. To have the world — and yourself — tell you it's over.\n\nI also know what it feels like to decide it's NOT over.\n\nThat decision is available to you right now.\n\nB.E.G.R.E.A.T. ⚡\n\n#BeGreat2026 #Motivation #Success #Mindset #Grind #Hustle #PersonalDevelopment`,
+  ],
+  youtube: [
+    `In this video, I share the raw truth about my journey — dropping out in 7th grade, spending 10 years in prison, and coming out the other side with a college degree.\n\nThis is not a highlight reel. This is the real story.\n\nIf you've ever felt like it's too late — watch this.\n\n🔔 Subscribe for weekly motivation: @BeGreat2026\n📅 New videos every week\n📧 Booking & speaking: [your email]\n\n#BeGreat2026 #Motivation #SecondChances #OvercomingAdversity #Prison #CollegeDegree #Inspiration`,
+  ]
+};
+
+function generateCaption(platform) {
+  const pool = captions[platform];
+  const picked = pool[Math.floor(Math.random() * pool.length)];
+  const el = document.getElementById('caption-output');
+  el.classList.add('active');
+  el.innerHTML = `<div style="font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase">📝 ${platform.toUpperCase()} CAPTION — READY TO COPY</div>${picked.replace(/\n/g,'<br>')}`;
+}
+
+// ═══════════════════════════════════════
+// QUICK LAUNCH
+// ═══════════════════════════════════════
+const toolMessages = {
+  flyers:  '🎨 To generate flyers, open Terminal and run:\n\ncd ~/.openclaw/workspace/begreat && python3 flyer_factory.py 30\n\n→ 30 branded flyers will appear on your Desktop in under 60 seconds. Ready to post.',
+  brief:   '📋 To get today\'s content brief, open Terminal and run:\n\ncd ~/.openclaw/workspace/begreat && python3 content_engine.py 1\n\n→ You\'ll get your full posting schedule, 3 fully written captions, your video topic, and hashtags.',
+  clips:   '✂️ Your 5 clips are already cut and in iCloud:\nDEMM WORK → 1 PERSON BILLION DOLLAR PLAN → Marketing Clients → Be Great 2026\n\n→ BeGreat_clip_1 through BeGreat_clip_5\n→ Open in CapCut → Auto Captions → Export → Post.',
+  booking: '📅 Your booking page is next on the build list.\nTell me YES and I\'ll build it right now — simple, powerful, free.\nIncludes: your story, packages, calendar, contact form.',
+  calendar:'📆 Say the word and I\'ll generate your full 30-day content calendar as a PDF — every day mapped out, what to post, when, what to say. Nothing to think about.',
+};
+
+function launchTool(tool) {
+  const el = document.getElementById('launch-output');
+  el.style.display = 'block';
+  el.innerHTML = toolMessages[tool].replace(/\n/g,'<br>');
+}
+
+// ═══════════════════════════════════════
+// BOT ACTIONS
+// ═══════════════════════════════════════
+const botDetails = {
+  dm: {
+    view: { title:'Bot 1 — Instagram DM Automator Script', body:`<span style="color:var(--gold)">TRIGGER:</span> Any new Instagram DM<br><br><span style="color:var(--white)">MESSAGE 1 (Instant):</span><br>"Hey [Name]! 👋 Thanks for reaching out to BeGreat2026! I'm Antwann Mitchell Sr. — motivational speaker, entrepreneur, and living proof that your past doesn't define your future.<br><br>What brought you here today? 🔥"<br><br><span style="color:var(--white)">IF they mention speaking/events:</span><br>"I'd love to speak at your event! I can bring the energy, the truth, and a message that changes lives. Let me send you my packages — what type of event is it?"<br><br><span style="color:var(--white)">IF they mention coaching:</span><br>"Yes! I do 1-on-1 coaching. We work on mindset, purpose, and building the life you deserve. First session is a discovery call — totally free. Want to book it?"<br><br><span style="color:var(--gold)">STATUS:</span> Script complete. Needs GHL phone number approval to activate.` },
+    deploy: { title:'Deploy Bot 1 in GHL', body:`<span style="color:var(--gold)">Steps to activate:</span><br>1. Log into GoHighLevel → Automations<br>2. Create new workflow: Trigger = "Instagram DM Received"<br>3. Action = Send Message (paste Bot 1 script)<br>4. Add branch: If keyword contains "speak/event" → send speaking info<br>5. If keyword contains "coach" → send coaching offer<br><br><span style="color:var(--green)">⏳ Waiting on:</span> Tampa 813 phone number approval. Bot is written and ready.` },
+  },
+  lead: {
+    view: { title:'Bot 2 — Website Lead Capture', body:`<span style="color:var(--gold)">FORM FIELDS:</span><br>• Full Name<br>• Email Address<br>• Phone Number<br>• Event Type (dropdown: Corporate, Church, School, Community, Other)<br>• Event Date<br>• Budget Range<br>• How did you find us?<br><br><span style="color:var(--gold)">ON SUBMIT:</span><br>→ Lead added to GHL pipeline (Stage 1: New Lead)<br>→ Confirmation email fires instantly (Bot 3 takes over)<br>→ Antwann gets SMS notification<br><br><span style="color:var(--white)">CONFIRMATION EMAIL (instant):</span><br>"[Name], your inquiry has been received! Antwann personally reviews every request and will reach out within 24 hours. In the meantime, follow @BeGreat2026 for daily motivation. B.E.G.R.E.A.T. ⚡"` },
+    deploy: { title:'Connect Lead Form to Site', body:`<span style="color:var(--gold)">Ready to build your booking page + lead form. Say YES and I will:</span><br><br>1. Build a full speaker booking page (your story, packages, form)<br>2. Connect it to GHL<br>3. Deploy it to Vercel<br>4. Add the link to your Instagram bio<br><br>Everything automated from inquiry to follow-up. Takes about 30 minutes to build.` },
+  },
+  followup: {
+    view: { title:'Bot 3 — Follow-Up Sequence (5 Stages)', body:`<span style="color:var(--gold)">DAY 1:</span> "Welcome to the BeGreat2026 family. Here's my story in 2 minutes..."<br><span style="color:var(--gold)">DAY 3:</span> "Most people never thought I'd make it. Here's what kept me going..."<br><span style="color:var(--gold)">DAY 7:</span> "I want to work with you directly. Here's how coaching works + what's included..."<br><span style="color:var(--gold)">DAY 14:</span> "[Testimonial from event attendee] — This is what transformation looks like..."<br><span style="color:var(--gold)">DAY 21:</span> "Last chance this month. Book your discovery call before the spots fill up..."<br><br><span style="color:var(--green)">STATUS:</span> All 5 emails written. Ready to load into GHL workflows.` },
+    deploy: { title:'Load Sequence into GHL', body:`<span style="color:var(--gold)">Steps:</span><br>1. GHL → Automations → New Workflow<br>2. Trigger: "Contact Added to Pipeline Stage 1"<br>3. Action: Wait 1 day → Send Email (Day 1 script)<br>4. Wait 2 days → Send Email (Day 3 script)<br>5. Continue for all 5 stages<br><br><span style="color:var(--green)">⏳ Waiting on:</span> GHL phone number approval → then 30 min to set up.` },
+  },
+  review: {
+    view: { title:'Bot 4 — Review Bot Script', body:`<span style="color:var(--gold)">TRIGGER:</span> 24 hours after speaking gig/coaching session marked complete in GHL<br><br><span style="color:var(--white)">SMS:</span><br>"Hey [Name]! It was an honor speaking at your event 🙏 Quick question — how did I do? Reply 1-5. Your feedback means everything to me."<br><br><span style="color:var(--gold)">IF rating 4-5:</span><br>"Amazing! Would you mind sharing that on Google? It helps others find the message they need: [Google Review Link] — Thank you! B.E.G.R.E.A.T. ⚡"<br><br><span style="color:var(--gold)">IF rating 1-3:</span><br>"Thank you for being honest. I want to make it right — can we jump on a quick call? Reply YES and I'll reach out personally."` },
+    deploy: { title:'Activate Review Bot', body:`<span style="color:var(--gold)">Steps:</span><br>1. GHL → Automations → New Workflow<br>2. Trigger: Pipeline Stage = "Event Complete"<br>3. Wait 24 hours<br>4. Send SMS (review request script)<br>5. Branch: If positive → send Google link / If negative → notify Antwann<br><br>Build time: 15 minutes once GHL is approved.` },
+  },
+  confirm: {
+    view: { title:'Bot 5 — Booking Confirmation Flow', body:`<span style="color:var(--gold)">TRIGGER:</span> Payment received / Booking confirmed<br><br><span style="color:var(--white)">INSTANT (Email + SMS):</span><br>"[Name] — YOU'RE CONFIRMED! 🔥 Antwann Mitchell Sr. is locked in for [Date]. Here's everything you need to know: [Event Checklist link]"<br><br><span style="color:var(--white)">3 DAYS BEFORE EVENT (SMS):</span><br>"[Name] — 3 days until we B.E.G.R.E.A.T. together! I'm ready. Are you? Reply with your event theme so I can personalize the message 🙌"<br><br><span style="color:var(--white)">DAY OF EVENT (SMS):</span><br>"TODAY IS THE DAY. See you soon. B.E.G.R.E.A.T. — Antwann ⚡"` },
+    deploy: { title:'Activate Booking Confirmation', body:`<span style="color:var(--gold)">Steps:</span><br>1. GHL → Automations → Trigger: Payment Received<br>2. Instantly send confirmation email + SMS<br>3. Add reminder: 3 days before event date<br>4. Add day-of message<br><br>All messages written. Plug and play once GHL is approved.` },
+  },
+  content: {
+    run:      { title:'Content Machine — Running', body:`Open Terminal and run:<br><br><code style="color:var(--gold);background:rgba(212,175,55,0.1);padding:2px 8px;border-radius:4px">cd ~/.openclaw/workspace/begreat && python3 content_engine.py 1</code><br><br>→ Full daily brief with 9 posts, 3 full captions, video topic, and hashtags.<br><br>To generate 30 flyers:<br><code style="color:var(--gold);background:rgba(212,175,55,0.1);padding:2px 8px;border-radius:4px">python3 flyer_factory.py 30</code>` },
+    schedule: { title:'Schedule Daily Content Brief', body:`Set this up to run every morning at 7AM automatically.<br><br>Open Terminal:<br><code style="color:var(--gold);background:rgba(212,175,55,0.1);padding:2px 8px;border-radius:4px">crontab -e</code><br><br>Add this line:<br><code style="color:var(--gold);background:rgba(212,175,55,0.1);padding:2px 8px;border-radius:4px">0 7 * * * cd ~/.openclaw/workspace/begreat && python3 content_engine.py >> ~/Desktop/BeGreat_Daily.txt</code><br><br>Every morning at 7AM your content plan is auto-generated.` },
+  }
+};
+
+function botAction(bot, action) {
+  const detail = botDetails[bot]?.[action];
+  if (!detail) return;
+  const out = document.getElementById('bot-output');
+  document.getElementById('bot-output-title').textContent = detail.title;
+  document.getElementById('bot-output-body').innerHTML = detail.body;
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ═══════════════════════════════════════
+// INIT ANIMATIONS
+// ═══════════════════════════════════════
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    animateCounter(document.getElementById('total-reach'), 0);
+    // Animate goal ring
+    const circle = document.getElementById('goalCircle');
+    circle.style.strokeDashoffset = 339.3 * 0.99; // 1% done = Day 1
+    document.getElementById('goal-pct').textContent = '1%';
+  }, 500);
+});
+</script>
+</body>
+</html>
